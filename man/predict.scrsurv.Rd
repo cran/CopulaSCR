@@ -57,8 +57,7 @@ fitasso<- scrassonp(t1.formula=survival::Surv(T1, event1) ~ 1,
                     b=quantile(simdata$T2,0.9),B=10,seed = 12345,
                     se = TRUE,se.method = "resampling")
 summary(fitasso)
-fit<- scrsurv(fit = fitasso, method= "JFKC",surv2km=FALSE,B=fitasso$B,
-se.method = fitasso$se.method,conf.int=TRUE,conftype =3)
+fit<- scrsurv(fit = fitasso, method= "JFKC", surv2km=FALSE, conf.int=TRUE,conftype =3)
 
 t1<- t2<- seq(0,3.5,0.1)
 ### marginal survival probabilities

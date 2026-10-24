@@ -202,7 +202,7 @@ scrassonp0<- function(t1data,t2data, equalweight = FALSE,copulafam,
 
     }
     tau.est<- sapply(copulaparam,Caltau,copulafam = copulafam)
-    names(tau.est)<- paste0("strata",1:nstrata)
+     names(tau.est)<- paste0("stratum=",1:nstrata)
   }else{
     copulaparam<- assonpfit( time1 = time1,event1 = event1,time2 = time2,event2 = event2,
                              copulafam = copulafam,equalweight=equalweight,
@@ -386,7 +386,7 @@ scrassonp_se<- function(time1,event1,time2,event2,out,se.method,B=100,
       }
       out$bootind<- bootind
     }
-    colnames(copulaparam.boot)<- paste0("strata",1:nstrata)
+     colnames(copulaparam.boot)<- paste0("stratum=",1:nstrata)
 
     out$param.boot<- copulaparam.boot
     out$param.se<- apply(copulaparam.boot,2,mad)

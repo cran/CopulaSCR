@@ -12,12 +12,15 @@
 \item{...}{Further arguments; currently unused.}
 }
 \value{
-The pseudo-log-likelihood value.
+An object of class \code{"logLik"} containing the
+  pseudo-log-likelihood value. The object has attributes \code{"df"}
+  and \code{"nobs"} for use by \code{AIC()} and \code{BIC()}.
 }
 \description{
 Extracts the pseudo-log-likelihood value from a fitted
 \code{"mscr"} object.
 }
 \seealso{
-\code{\link{mscr}}
+\code{\link{mscr}}, \code{\link[stats]{AIC}},
+  \code{\link[stats]{BIC}}
 }

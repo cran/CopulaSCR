@@ -21,12 +21,7 @@ Yu, Tonghui, Zhang, Binhui, Xiang, Liming, Ma, Jianwei, and Chen, Chixiang. Copu
 \emph{Working paper.}
 }
 \author{
-\strong{Maintainer}: Tonghui Yu \email{tonghui_yu@126.com}
-
-Authors:
-\itemize{
-  \item Binhui Zhang
-}
-
+Tonghui Yu
+Binhui Zhang
 }
 \keyword{internal}

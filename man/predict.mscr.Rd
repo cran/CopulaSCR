@@ -7,10 +7,10 @@
 \method{predict}{mscr}(
   object,
   t1obs = NULL,
-  times = knots(object$S_D),
+  times = NULL,
   cause = NULL,
   type = c("msurv", "surv", "rrms", "rmst", "qrl", "qst"),
-  tu = max(knots(object$S_D)),
+  tu = NULL,
   tau = 0.5,
   nsim = 1000,
   maxobs = TRUE,

@@ -119,8 +119,7 @@
 #' fit21<- scrsurv(fit = fitasso, method= "JFKC",surv2km=FALSE,B=10,
 #' se.method = "resampling",conf.int=TRUE,conftype =1,seed = 12345)
 #' plot(fit21,conf.int = TRUE)
-#' fit22<- scrsurv(fit = fitasso, method= "JFKC",surv2km=FALSE,B=fitasso$B,
-#' se.method = fitasso$se.method,conf.int=TRUE,conftype =3)
+#' fit22<- scrsurv(fit = fitasso, method= "JFKC", surv2km=FALSE, conf.int=TRUE,conftype =3)
 #' plot(fit22,conf.int = TRUE)
 #'
 #' #####  estimation of nonparametric marginals with specified Kendall's tau
@@ -154,6 +153,15 @@ scrsurv <- function(fit, t1.formula, t2.formula, data = parent.frame(),
                     se.method = c("bootstrap","resampling"),
                     conf.int=TRUE, conftype=1,seed=NULL ) {
   Call <- match.call()
+  if (!missing(fit) && inherits(fit, "scrassonp")) {
+    if (missing(B) && !is.null(fit$B)) {
+      B <- fit$B
+    }
+    
+    if (missing(se.method) && !is.null(fit$se.method)) {
+      se.method <- fit$se.method
+    }
+  }
   bandwidth = NULL
   model = TRUE
   xlimits <- 5

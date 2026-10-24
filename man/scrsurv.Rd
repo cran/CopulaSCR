@@ -112,8 +112,7 @@ association_estimates(fitasso)
 fit21<- scrsurv(fit = fitasso, method= "JFKC",surv2km=FALSE,B=10,
 se.method = "resampling",conf.int=TRUE,conftype =1,seed = 12345)
 plot(fit21,conf.int = TRUE)
-fit22<- scrsurv(fit = fitasso, method= "JFKC",surv2km=FALSE,B=fitasso$B,
-se.method = fitasso$se.method,conf.int=TRUE,conftype =3)
+fit22<- scrsurv(fit = fitasso, method= "JFKC", surv2km=FALSE, conf.int=TRUE,conftype =3)
 plot(fit22,conf.int = TRUE)
 
 #####  estimation of nonparametric marginals with specified Kendall's tau

@@ -1,0 +1,28 @@
+# Keep the software reference consistent with DESCRIPTION metadata.
+if (is.null(meta$URL)) {
+  meta$URL <- "https://CRAN.R-project.org/package=CopulaSCR"
+}
+citation(auto = meta)
+
+bibentry(
+  bibtype = "Article",
+  title = paste0("Learning association from multiple intermediate events for dynamic ",
+    "prediction of survival: an application to cardiovascular disease prognosis"),
+  author = c(person("Tonghui", "Yu"), person("Liming", "Xiang")),
+  year = "2026",
+  journal = "Biometrics",
+  volume = "82",
+  number = "2",
+  pages = "ujag087",
+  doi = "10.1093/biomtc/ujag087"
+)
+
+bibentry(
+  bibtype = "Unpublished",
+  title = paste0("{CopulaSCR}: An {R} Package for the Analysis of ",
+    "Semi-competing Risks Data Using Copula-based Models"),
+  author = c(person("Tonghui", "Yu"), person("Binhui", "Zhang"),
+    person("Liming", "Xiang"), person("Jianwei", "Ma"), person("Chixiang", "Chen")),
+  year = "2026",
+  note = "Working paper"
+)

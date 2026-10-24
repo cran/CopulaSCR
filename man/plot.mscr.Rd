@@ -6,7 +6,7 @@
 \usage{
 \method{plot}{mscr}(
   x,
-  type = c("msurv", "data"),
+  type = c("msurv", "data", "association"),
   nt.seperate = FALSE,
   linetype = "strata",
   censor = FALSE,
@@ -14,6 +14,9 @@
   ylab = "Survival probability",
   fontsize = 10,
   height = 7,
+  n = 200,
+  seed = NULL,
+  col.lim = NULL,
   ...
 )
 }
@@ -21,7 +24,9 @@
 \item{x}{Object of class \code{mscr}.}
 
 \item{type}{Display the data structure if \code{type = "data"}, and
-display the marginal survival curve of each event time if \code{type = "msurv"}.}
+display the marginal survival curve of each event time if
+\code{type = "msurv"}, or display the reconstructed association
+structure if \code{type = "association"}.}
 
 \item{nt.seperate}{logical value. If FALSE, place all survival curves of
 intermediate event times in a single plot}
@@ -39,6 +44,14 @@ a character vector c("solid", "dashed").}
 \item{fontsize}{Font size, in points, for text in the plot of the data structure.}
 
 \item{height}{Height of the node in the plot of the data structure, in inches.}
+
+\item{n}{Number of complete event-time sets simulated for the association
+structure plot.}
+
+\item{seed}{Optional random seed for the association structure plot.}
+
+\item{col.lim}{Optional two-element color range. By default, the range
+expands the reference range \code{0.15--0.85} when needed.}
 
 \item{...}{other arguments}
 }

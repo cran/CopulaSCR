@@ -34,15 +34,19 @@
 #' A simulated dataset for semi-competing risks analysis with three
 #' intermediate events and one terminal event.
 #'
-#' @format An object of class \code{mscrData}, implemented as a list with
-#' five components:
+#' @format A list with five components:
 #' \describe{
 #'   \item{T1}{A numeric matrix with 100 rows and 3 columns, containing observed times for three intermediate events.}
 #'   \item{T2}{A numeric vector of length 100, containing observed terminal event times.}
 #'   \item{event1}{A numeric matrix with 100 rows and 3 columns, containing event indicators for the three intermediate events.}
 #'   \item{event2}{A numeric vector of length 100, containing terminal event indicators.}
-#'   \item{call}{The function call used to generate the data.}
+#'   \item{T2true}{A numeric vector of length 100, containing the true terminal event times before censoring.}
 #' }
+#' @examples
+#' set.seed(12345)
+#' mdata <- simSCRmul(n = 100, copulafam = "frank", K = 3,
+#'   tau.alpha = .5, tau.theta = .5, trueout = TRUE)
+#' all.equal(mdata, mSCRdata)
 #' @usage data(mSCRdata)
 "mSCRdata"
 

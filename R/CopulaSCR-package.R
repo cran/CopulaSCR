@@ -7,7 +7,9 @@
 #' The package also includes tools for visualization of semi-competing risks data and
 #' simulation from the models.
 #' @aliases CopulaSCR-package
-#'
+#' @author
+#' Tonghui Yu
+#' Binhui Zhang
 #' @references Yu, Tonghui, and Xiang, Liming. Learning association from multiple intermediate events for dynamic prediction of survival: 
 #' an application to cardiovascular disease prognosis,Biometrics, 2026, 82(2): ujag087.
 #' 

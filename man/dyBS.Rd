@@ -74,10 +74,10 @@ ibs<-c(integrated_brier_score(BS),
   integrated_brier_score(BS1m)) ## integrated BS
 
 ### plot Brier Scores
-plot(BS$BS,ylim = c(0,0.7),type="l",xlab="time",ylab="Brier Score",col=1)
-lines(BS0$BS,col=2)
-lines(BS1$BS,col=3)
-lines(BS1m$BS,col=4)
+plot(brier_scores(BS),ylim = c(0,0.7),type="l",xlab="time",ylab="Brier Score",col=1)
+lines(brier_scores(BS0),col=2)
+lines(brier_scores(BS1),col=3)
+lines(brier_scores(BS1m),col=4)
 legend("topright",col = 1:4,lty = 1,legend = c("DP","P0","P1","P1m"))
 }
 }

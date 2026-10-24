@@ -116,7 +116,7 @@ print.scrassonp <- function(x,...) {
              "\nContinuous predictor variables: ",
              continuous.predictors)))
 
-  cat("Estimation of Kendall's tau in the", toupper(x$copulafam),
+  cat("Kendall's tau in the", tools::toTitleCase(tolower(x$copulafam)),
       "copula structure:",
       round(x$tau,3),"\n")
 
@@ -159,13 +159,13 @@ print.mscr <- function(x,...) {
   cat(length(x$mar.fits), "intermediate events, 1 terminal event.\n")
   cat("-------\n")
   message("Association analyses")
-  cat("Estimated Kendall's tau in the", toupper(x$copulafam),
+  cat("Kendall's tau in the", tools::toTitleCase(tolower(x$copulafam)),
       "copula structure\n")
   cat("tau.theta:\n")
   print(round(x$tau.theta,3))
 
   cat("tau.alpha:\n")
-  print(round(x$tau.alpha,3))
+  cat(round(x$tau.alpha, 3), "\n")
   cat("-------\n")
   message("Marginal analyses (survival curves)")
   cat("intermediate event times: A list of", length(x$mar.fits), "scrsurv objects.\n")
@@ -177,4 +177,63 @@ print.mscr <- function(x,...) {
 
 }
 
-
+#' Print a 'predmscr' Object
+#'
+#' Prints a compact summary of predictions returned by \code{predict.mscr()}.
+#'
+#' @param x An object of class \code{"predmscr"}.
+#' @param max.print Maximum number of scalar prediction values to print.
+#' @param ... Additional arguments passed to \code{print()} when scalar
+#'   prediction values are displayed.
+#'
+#' @return The object \code{x}, invisibly.
+#' @seealso \code{\link{predict.mscr}}, \code{\link{predicted_values}}
+#' @export
+print.predmscr <- function(x, max.print = 6L, ...) {
+  type <- attr(x, "type", exact = TRUE)
+  
+  cat("\nPredictions from an 'mscr' object\n")
+  cat("Type:", if (is.null(type)) "unknown" else type, "\n")
+  
+  if (identical(type, "msurv")) {
+    event.names <- names(x)
+    
+    if (is.null(event.names)) {
+      event.names <- paste("Event", seq_along(x))
+    }
+    
+    n.times <- vapply(
+      x,
+      function(z) {
+        if (is.null(z$t1)) NA_integer_ else length(z$t1)
+      },
+      integer(1)
+    )
+    
+    print(
+      data.frame(
+        event = event.names,
+        evaluation.times = n.times,
+        check.names = FALSE
+      ),
+      row.names = FALSE
+    )
+  } else {
+    values <- predicted_values(x)
+    
+    if (is.atomic(values)) {
+      n.values <- length(values)
+      print(utils::head(values, max.print), ...)
+      
+      if (n.values > max.print) {
+        cat("...", n.values - max.print,
+            "additional value(s) omitted.\n")
+      }
+    } else {
+      cat("Prediction sets:", length(values), "\n")
+    }
+  }
+  
+  cat("Use predicted_values() to extract the prediction values.\n")
+  invisible(x)
+}

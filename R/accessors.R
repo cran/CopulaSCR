@@ -179,8 +179,34 @@ predicted_values.predmscr <- function(object, ...) {
 
 #' Extract Association Estimates
 #'
+#' Extracts association estimates from fitted CopulaSCR model objects without
+#' requiring direct access to their internal components.
+#'
+#' @param object A fitted CopulaSCR model object.
+#' @param scale A character string specifying the association measure to
+#'   extract. Possible values are \code{"tau"} (the default) and
+#'   \code{"copula"}.
+#' @param ... Additional arguments; currently unused.
+#'
+#' @return A data frame containing the estimates and their standard errors.
+#'   Standard errors are reported as \code{NA} when they were not computed
+#'   during model fitting.
+#'
+#' @seealso \code{\link{association_estimates.scrassonp}},
+#'   \code{\link{association_estimates.mscr}}
+#'
+#' @name association_estimates.scrassonp
+#' @rdname association_estimates.scrassonp
+#' @export
+association_estimates <- function(object, ...) {
+  UseMethod("association_estimates")
+}
+
+
+#' Extract Association Estimates from an 'scrassonp' Object
+#'
 #' Extracts the estimated Kendall's tau values or copula parameters and their
-#' standard errors from an object returned by \code{scrassonp()}. This function
+#' standard errors from an object returned by \code{scrassonp()}. This method
 #' avoids direct access to the internal components of a fitted
 #' \code{"scrassonp"} object.
 #'
@@ -194,16 +220,10 @@ predicted_values.predmscr <- function(object, ...) {
 #'   Standard errors are reported as \code{NA} when they were not computed
 #'   during model fitting.
 #'
-#' @seealso \code{\link{scrassonp}},
-#'   \code{\link{summary.scrassonp}}
+#' @seealso \code{\link{scrassonp}}, \code{\link{association_estimates}}
 #'
-#' @export
-association_estimates <- function(object, ...) {
-  UseMethod("association_estimates")
-}
-
-
-#' @rdname association_estimates
+#' @name association_estimates.scrassonp
+#' @rdname association_estimates.scrassonp
 #' @export
 association_estimates.scrassonp <- function(
     object,
@@ -236,7 +256,7 @@ association_estimates.scrassonp <- function(
     rownames(out) <- "overall"
   } else {
     rownames(out) <- paste0(
-      "strata",
+      "stratum=",
       seq_along(estimate)
     )
   }
@@ -244,7 +264,257 @@ association_estimates.scrassonp <- function(
   out
 }
 
+#' Extract Association Estimates from an 'mscr' Object
+#'
+#' Extracts the estimated Kendall's tau values or copula parameters from an
+#' object returned by \code{mscr()}. The first row contains the association
+#' parameter among the intermediate events, and the remaining rows contain
+#' the associations between each intermediate event and the terminal event.
+#'
+#' @param object An object of class \code{"mscr"}.
+#' @param scale A character string specifying the association measure to
+#'   extract. Possible values are \code{"tau"} (the default) and
+#'   \code{"copula"}.
+#' @param ... Additional arguments; currently unused.
+#'
+#' @return A data frame containing the estimates. Standard errors are returned
+#'   as \code{NA} because they are not computed by \code{mscr()}.
+#'
+#' @seealso \code{\link{mscr}}, \code{\link{association_estimates}}
+#'
+#' @rdname association_estimates.mscr
+#' @export
+association_estimates.mscr <- function(
+    object,
+    scale = c("tau", "copula"),
+    ...) {
+  
+  scale <- match.arg(scale)
+  
+  if (scale == "tau") {
+    estimate <- c(object$tau.alpha, object$tau.theta)
+  } else {
+    estimate <- c(object$alpha, object$theta)
+  }
+  
+  event_names <- names(object$theta)
+  if (is.null(event_names)) {
+    event_names <- paste0("T", seq_along(object$theta))
+  }
+  
+  out <- data.frame(
+    estimate = as.numeric(estimate),
+    std.error = rep(NA_real_, length(estimate))
+  )
+  rownames(out) <- c("alpha", event_names)
+  out
+}
 
+#' Coefficients of an 'scrassonp' Object
+#'
+#' @param object An object of class \code{"scrassonp"}.
+#' @param ... Additional arguments; currently unused.
+#'
+#' @export
+coef.scrassonp <- function(object, ...) {
+  estimates <- association_estimates(object, scale = "copula")
+  
+  coefficients <- estimates$estimate
+  names(coefficients) <- rownames(estimates)
+  
+  coefficients
+}
+
+#' Covariance Matrix of an 'scrassonp' Object
+#'
+#' @param object An object of class \code{"scrassonp"}.
+#' @param ... Additional arguments; currently unused.
+#'
+#' @export
+vcov.scrassonp <- function(object, ...) {
+  estimates <- association_estimates(object, scale = "copula")
+  standard.errors <- estimates$std.error
+  coefficients <- stats::coef(object)
+  
+  if (length(standard.errors) != length(coefficients) ||
+      anyNA(standard.errors)) {
+    stop(
+      paste0(
+        "Covariance estimates are unavailable; ",
+        "refit with standard-error estimation enabled."
+      ),
+      call. = FALSE
+    )
+  }
+  
+  covariance <- diag(
+    standard.errors^2,
+    nrow = length(coefficients),
+    ncol = length(coefficients)
+  )
+  
+  dimnames(covariance) <- list(
+    names(coefficients),
+    names(coefficients)
+  )
+  
+  covariance
+}
+
+#' Confidence Intervals for an 'scrassonp' Object
+#'
+#' @param object An object of class \code{"scrassonp"}.
+#' @param parm Parameters to include.
+#' @param level Confidence level for the intervals.
+#' @param scale Association scale: \code{"copula"} or \code{"tau"}.
+#' @param ... Additional arguments; currently unused.
+#'
+#' @export
+confint.scrassonp <- function(
+    object,
+    parm,
+    level = 0.95,
+    scale = c("copula", "tau"),
+    ...) {
+  
+  if (!is.numeric(level) ||
+      length(level) != 1L ||
+      is.na(level) ||
+      level <= 0 ||
+      level >= 1) {
+    stop(
+      "'level' must be a single number between 0 and 1.",
+      call. = FALSE
+    )
+  }
+  
+  scale <- match.arg(scale)
+  
+  draws <- if (scale == "copula") {
+    object$param.boot
+  } else {
+    object$tau.boot
+  }
+  
+  if (is.null(draws)) {
+    stop(
+      paste0(
+        "Confidence intervals are unavailable; ",
+        "refit with standard-error estimation enabled."
+      ),
+      call. = FALSE
+    )
+  }
+  
+  if (is.null(dim(draws))) {
+    draws <- matrix(draws, ncol = 1L)
+  } else {
+    draws <- as.matrix(draws)
+  }
+  
+  probabilities <- c(
+    (1 - level) / 2,
+    1 - (1 - level) / 2
+  )
+  
+  intervals <- t(
+    apply(
+      draws,
+      2L,
+      stats::quantile,
+      probs = probabilities,
+      na.rm = TRUE,
+      names = FALSE
+    )
+  )
+  
+  parameter.names <- names(stats::coef(object))
+  
+  rownames(intervals) <- parameter.names
+  colnames(intervals) <- paste0(
+    format(
+      100 * probabilities,
+      trim = TRUE,
+      scientific = FALSE
+    ),
+    "%"
+  )
+  
+  if (scale == "tau") {
+    intervals[intervals < -1] <- -1
+    intervals[intervals > 1] <- 1
+  }
+  
+  if (!missing(parm)) {
+    if (is.character(parm)) {
+      positions <- match(parm, rownames(intervals))
+      
+      if (anyNA(positions)) {
+        stop(
+          "Unknown parameter name in 'parm'.",
+          call. = FALSE
+        )
+      }
+    } else if (is.numeric(parm)) {
+      if (anyNA(parm) ||
+          any(parm != as.integer(parm)) ||
+          any(parm < 1L | parm > nrow(intervals))) {
+        stop(
+          "Invalid parameter position in 'parm'.",
+          call. = FALSE
+        )
+      }
+      
+      positions <- as.integer(parm)
+    } else {
+      stop(
+        "'parm' must be numeric or character.",
+        call. = FALSE
+      )
+    }
+    
+    intervals <- intervals[positions, , drop = FALSE]
+  }
+  
+  intervals
+}
+
+#' Number of Observations for an 'scrassonp' Object
+#'
+#' @param object An object of class \code{"scrassonp"}.
+#' @param use.fallback Logical value included for compatibility with
+#'   \code{nobs()}.
+#' @param ... Additional arguments; currently unused.
+#'
+#' @importFrom stats nobs
+#' @export
+nobs.scrassonp <- function(
+    object,
+    use.fallback = FALSE,
+    ...) {
+  
+  NROW(object$t1data$model.response)
+}
+
+#' Model Frame of an 'scrassonp' Object
+#'
+#' @param formula An object of class \code{"scrassonp"}.
+#' @param ... Additional arguments; currently unused.
+#'
+#' @export
+model.frame.scrassonp <- function(formula, ...) {
+  if (is.null(formula$data)) {
+    stop(
+      paste0(
+        "The model frame is unavailable; ",
+        "refit with 'model = TRUE'."
+      ),
+      call. = FALSE
+    )
+  }
+  
+  formula$data
+}
 
 #' Extract a Marginal Fit
 #'
@@ -409,11 +679,19 @@ brier_scores.dyBS <- function(object, ...) {
 #' @param object An object of class \code{"mscr"}.
 #' @param ... Further arguments; currently unused.
 #'
-#' @return The pseudo-log-likelihood value.
+#' @return An object of class \code{"logLik"} containing the
+#'   pseudo-log-likelihood value. The object has attributes \code{"df"}
+#'   and \code{"nobs"} for use by \code{AIC()} and \code{BIC()}.
 #'
-#' @seealso \code{\link{mscr}}
+#' @seealso \code{\link{mscr}}, \code{\link[stats]{AIC}},
+#'   \code{\link[stats]{BIC}}
 #'
 #' @export
 logLik.mscr <- function(object, ...) {
-  object$logLik.alpha
+  structure(
+    as.numeric(object$logLik.alpha)[1L],
+    df = 1L,
+    nobs = NROW(object$t1obs),
+    class = "logLik"
+  )
 }

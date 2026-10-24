@@ -37,8 +37,7 @@
 #'                     b=quantile(simdata$T2,0.9),B=10,seed = 12345,
 #'                     se = TRUE,se.method = "resampling")
 #' summary(fitasso)
-#' fit<- scrsurv(fit = fitasso, method= "JFKC",surv2km=FALSE,B=fitasso$B,
-#' se.method = fitasso$se.method,conf.int=TRUE,conftype =3)
+#' fit<- scrsurv(fit = fitasso, method= "JFKC", surv2km=FALSE, conf.int=TRUE,conftype =3)
 #'
 #' t1<- t2<- seq(0,3.5,0.1)
 #' ### marginal survival probabilities
@@ -274,9 +273,9 @@
 #'}
 #'
 #'
-"predict.mscr"<- function(object, t1obs = NULL,times= knots(object$S_D),cause = NULL,
+"predict.mscr"<- function(object, t1obs = NULL,times= NULL,cause = NULL,
                           type=c("msurv","surv", "rrms", "rmst", "qrl","qst"),
-                          tu=max(knots(object$S_D)),tau=0.5,nsim=1000,maxobs=TRUE,...){
+                          tu= NULL,tau=0.5,nsim=1000,maxobs=TRUE,...){
   type<- match.arg(type)
   if (is.null(t1obs)) {
     t1obs<- object$t1obs
@@ -287,6 +286,13 @@
       "'t1obs' was not supplied and is not stored in the fitted object.",
       call. = FALSE
     )
+  }
+  if (is.null(times)) {
+    times <- knots(object$S_D)
+  }
+  
+  if (is.null(tu)) {
+    tu <- max(knots(object$S_D))
   }
   
   if(type!="msurv"){
